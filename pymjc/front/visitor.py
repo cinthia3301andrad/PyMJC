@@ -717,9 +717,9 @@ class FillSymbolTableVisitor(Visitor):
             for method_index in range(element.method_decl_list.size()):
                 element.method_decl_list.element_at(method_index).accept(self)
         else: 
-            self.add_semantic_error(SemanticErrorType.ALREADY_DECLARED_CLASS, element.class_name.name)
+            self.add_semantic_error(SemanticErrorType.ALREADY_DECLARED_CLASS)
         element.class_name.accept(self)
-        
+
     def visit_var_decl(self, element: VarDecl) -> None:
         new_var_declaration = self.symbol_table.add_field(
                 element.name.name, element.type)
@@ -729,96 +729,125 @@ class FillSymbolTableVisitor(Visitor):
         element.type.accept(self)
         element.name.accept(self)
      
-
     def visit_method_decl(self, element: MethodDecl) -> None:
-        pass
+        is_new_method = self.symbol_table.add_method(
+            element.name.name,  MethodEntry(element.type))
+        if(is_new_method):
+            for i_formal in range(element.formal_param_list.size()):
+                element.formal_param_list.element_at(i_formal).accept(self)
+            for i_var in range(element.var_decl_list.size()):
+                element.var_decl_list.element_at(i_var).accept(self)
+            for i_statement in range(element.statement_list.size()):
+                element.statement_list.element_at(i_statement).accept(self)
+        else: 
+            self.add_semantic_error(SemanticErrorType.ALREADY_DECLARED_METHOD)
+        element.type.accept(self)
+        element.name.accept(self)
+        element.return_exp.accept(self)
 
     def visit_formal(self, element: Formal) -> None:
-        pass
-
+        if (not self.symbol_table.add_param(element.name.name, element.type)):
+            self.add_semantic_error(SemanticErrorType.DUPLICATED_ARG)
+        element.type.accept(self)
+        element.name.accept(self)
 
     def visit_int_array_type(self, element: IntArrayType) -> None:
-        pass
+        return None
     
     def visit_boolean_type(self, element: BooleanType) -> None:
-        pass
+        return None
     
     def visit_integer_type(self, element: IntegerType) -> None:
-        pass
+        return None
 
     def visit_identifier_type(self, element: IdentifierType) -> None:
-        pass
+        return None
 
-    
     def visit_block(self, element: Block) -> None:
-        pass
+        for index in range(element.statement_list.size()):
+            element.statement_list.element_at(index).accept_type(self)
 
     def visit_if(self, element: If) -> None:
-        pass
+        element.condition_exp.accept_type(self)
+        element.if_statement.accept_type(self)
+        element.else_statement.accept_type(self)
   
     def visit_while(self, element: While) -> None:
-        pass
+        element.condition_exp.accept_type(self)
+        element.statement.accept_type(self)
 
     def visit_print(self, element: Print) -> None:
-        pass
+        element.print_exp.accept(self)
 
     def visit_assign(self, element: Assign) -> None:
-        pass
+        element.left_side.accept(self)
+        element.right_side.accept(self)
 
     def visit_array_assign(self, element: ArrayAssign) -> None:
-        pass
+        element.array_name.accept(self)
+        element.array_exp.accept(self)
+        element.right_side.accept(self)
 
     
     def visit_and(self, element: And) -> None:
-        pass
+        element.left_side.accept_type(self)
+        element.right_side.accept_type(self)
 
     def visit_less_than(self, element: LessThan) -> None:
-        pass
+        element.left_side.accept_type(self)
+        element.right_side.accept_type(self)
 
     def visit_plus(self, element: Plus) -> None:
-        pass
+        element.left_side.accept(self)
+        element.right_side.accept(self)
 
     def visit_minus(self, element: Minus) -> None:
-        pass
+        element.left_side.accept(self)
+        element.right_side.accept(self)
 
     def visit_times(self, element: Times) -> None:
-        pass
+        element.left_side.accept(self)
+        element.right_side.accept(self)
 
     def visit_array_lookup(self, element: ArrayLookup) -> None:
-        pass
+        element.out_side_exp.accept(self)
+        element.in_side_exp.accept(self)
 
     def visit_array_length(self, element: ArrayLength) -> None:
-        pass
+        element.length_exp.accept(self)
 
     def visit_call(self, element: Call) -> None:
-        pass
+        element.callee_exp.accept_type(self)
+        element.callee_name.accept_type(self)
+        for index in range(element.arg_list.size()):
+            element.arg_list.element_at(index).accept_type(self)
 
     def visit_integer_literal(self, element: IntegerLiteral) -> None:
-        pass
+        return None
 
     def visit_true_exp(self, element: TrueExp) -> None:
-        pass
+        return None
 
     def visit_false_exp(self, element: FalseExp) -> None:
-        pass
+        return None
 
     def visit_identifier_exp(self, element: IdentifierExp) -> None:
-        pass
+        return None
 
     def visit_this(self, element: This) -> None:
-        pass
+        return None
 
     def visit_new_array(self, element: NewArray) -> None:
-        pass
+        element.new_exp.accept(self)
 
     def visit_new_object(self, element: NewObject) -> None:
-        pass
+        element.object_name.accept(self)
 
     def visit_not(self, element: Not) -> None:
-        pass
+        element.negated_exp.accept(self)
 
     def visit_identifier(self, element: Identifier) -> None:
-        pass
+        return None
 
 
 
