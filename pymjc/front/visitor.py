@@ -676,19 +676,58 @@ class FillSymbolTableVisitor(Visitor):
         return self.symbol_table
 
     def visit_program(self, element: Program) -> None:
-        pass
+        element.main_class.accept(self)
+        for i in range(element.class_decl_list.size()):
+            element.class_decl_list.element_at(i).accept(self)
 
     def visit_main_class(self, element: MainClass) -> None:
-        pass
+        class_entry = ClassEntry()
+        self.symbol_table.add_scope(element.class_name_identifier.name, class_entry)
+        element.statement.accept(self)
+        element.arg_name_ideintifier.accept(self)
+        element.class_name_identifier.accept(self)
 
     def visit_class_decl_extends(self, element: ClassDeclExtends) -> None:
-        pass
+        super_class_base = ClassEntry(element.super_class_name.name)
+        is_new_class_simples = self.symbol_table.add_scope(
+            element.class_name.name, super_class_base)
+
+        if(is_new_class_simples): 
+            if(self.symbol_table.contains_key(element.super_class_name.name)):
+                self.symbol_table.add_extends_entry(element.class_name.name, super_class_base)
+                for var_index in range(element.var_decl_list.size()):
+                    element.var_decl_list.element_at(var_index).accept(self)
+                for method_index in range(element.method_decl_list.size()):
+                    element.method_decl_list.element_at(method_index).accept(self)
+            else: 
+                self.add_semantic_error(SemanticErrorType.UNDECLARED_SUPER_CLASS)
+        else:
+            self.add_semantic_error(SemanticErrorType.ALREADY_DECLARED_CLASS)
+        
+        element.class_name.accept(self)
+        element.super_class_name.accept(self)
 
     def visit_class_decl_simple(self, element: ClassDeclSimple) -> None:
-        pass
-
+        class_entry = ClassEntry()
+        is_new_class_simples = self.symbol_table.add_scope(
+            element.class_name.name, class_entry)
+        if(is_new_class_simples):
+            for var_index in range(element.var_decl_list.size()):
+                element.var_decl_list.element_at(var_index).accept(self)
+            for method_index in range(element.method_decl_list.size()):
+                element.method_decl_list.element_at(method_index).accept(self)
+        else: 
+            self.add_semantic_error(SemanticErrorType.ALREADY_DECLARED_CLASS, element.class_name.name)
+        element.class_name.accept(self)
+        
     def visit_var_decl(self, element: VarDecl) -> None:
-        pass
+        new_var_declaration = self.symbol_table.add_field(
+                element.name.name, element.type)
+        if(not new_var_declaration):
+            self.add_semantic_error(
+                SemanticErrorType.ALREADY_DECLARED_VAR, element.name.name)
+        element.type.accept(self)
+        element.name.accept(self)
      
 
     def visit_method_decl(self, element: MethodDecl) -> None:
