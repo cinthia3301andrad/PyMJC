@@ -67,7 +67,7 @@ class MJParser(Parser):
 
     @_('VarDeclarationStar VarDeclaration')
     def VarDeclarationStar(self, p):
-        p.VarDeclarationStar.add_elemente(p.VarDeclaration)
+        p.VarDeclarationStar.add_element(p.VarDeclaration)
         return p.VarDeclarationStar
 
     @_('Type Identifier SEMICOLON')
@@ -149,7 +149,7 @@ class MJParser(Parser):
 
     @_('IF LEFTPARENT Expression RIGHTPARENT Statement ELSE Statement')
     def Statement(self, p):
-        return If(p.Expression, p.Statement1, p.Statemente2)
+        return If(p.Expression, p.Statement0, p.Statement1)
 
     @_('WHILE LEFTPARENT Expression RIGHTPARENT Statement')
     def Statement(self, p):
@@ -165,7 +165,7 @@ class MJParser(Parser):
 
     @_('Identifier LEFTSQRBRACKET Expression RIGHTSQRBRACKET EQUALS Expression SEMICOLON')
     def Statement(self, p):
-        return ArrayAssign(p.Identifier, p.Expression1, p.Expression2)
+        return ArrayAssign(p.Identifier, p.Expression0, p.Expression1)
 
     ###################################
     #Expression Declarations          #
@@ -173,27 +173,27 @@ class MJParser(Parser):
 
     @_('Expression AND Expression')
     def Expression(self, p):
-        return And(p.Expression1, p.Expression2)
+        return And(p.Expression0, p.Expression1)
 
     @_('Expression LESS Expression')
     def Expression(self, p):
-        return LessThan(p.Expression1, p.Expression2)
+        return LessThan(p.Expression0, p.Expression1)
 
     @_('Expression PLUS Expression')
     def Expression(self, p):
-        return Plus(p.Expression1, p.Expression2)
+        return Plus(p.Expression0, p.Expression1)
 
     @_('Expression MINUS Expression')
     def Expression(self, p):
-        return Minus(p.Expression1, p.Expression2)
+        return Minus(p.Expression0, p.Expression1)
 
     @_('Expression TIMES Expression')
     def Expression(self, p):
-        return Times(p.Expression1, p.Expression2)
+        return Times(p.Expression0, p.Expression1)
 
     @_('Expression LEFTSQRBRACKET Expression RIGHTSQRBRACKET')
     def Expression(self, p):
-        return ArrayLookup(p.Expression1, p.Expression2)
+        return ArrayLookup(p.Expression0, p.Expression1)
 
     @_('Expression DOT LENGTH')
     def Expression(self, p):
