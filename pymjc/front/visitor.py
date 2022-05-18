@@ -676,10 +676,12 @@ class FillSymbolTableVisitor(Visitor):
         return self.symbol_table
 
     def visit_program(self, element: Program) -> None:
-        element.main_class.accept(self)
-        for i in range(element.class_decl_list.size()):
-            element.class_decl_list.element_at(i).accept(self)
-
+        if element and element.main_class is not None:
+            element.main_class.accept(self)
+            for varDecl in element.class_decl_list.get_elements():
+                if varDecl is not None:
+                    varDecl.accept(self)
+    
     def visit_main_class(self, element: MainClass) -> None:
         class_entry = ClassEntry()
         self.symbol_table.add_scope(element.class_name_identifier.name, class_entry)
