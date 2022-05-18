@@ -29,35 +29,35 @@
     > Escreva sua resposta aqui
 
 
-# 2º Relatóio: Etapa AI-b (Árvores Sintática Abstrata e Análise Semântica)
+# 2º Relatório: Etapa AI-b (Árvores Sintática Abstrata e Análise Semântica)
 
 1. Qual é o nome do relator?
 
-    > Escreva sua resposta aqui
+    > Geovane
 
 2. A etapa foi completamente ou parcialmente concluída?
 
-    > Escreva sua resposta aqui
+    > Parcialmente concluída
 
 3. No caso de parcialmente concluída, o que não foi concluído?
 
-    > Escreva sua resposta aqui
+    > Implementação do TypeCheckingVisitor para fazer verificações de tipos.
 
 4. O programa passa nos testes automatizados?
     
-    > Escreva sua resposta aqui
+    > Parcialmente, todos os casos de teste de LexerTest e ParserTest, exceto para casos de teste de SemanticTest.
 
 5. Algum erro de execução foi encontrado para alguma das entradas? Quais?
     
-    > Escreva sua resposta aqui
+    > Falha para casos de teste de SemanticTest.
 
 6. Quais as dificuldades encontradas para realização da etapa do projeto?
     
-    > Escreva sua resposta aqui
+    > Tempo e compreensão de como preencher a tabela e fazer a verificação de tipos
 
 7. Qual a participação de cada membro da equipe na etapa de execução?
     
-    > Escreva sua resposta aqui
+    > Daniele ficou responsável pela construção do paser.py. Cinthia e Geovane ficaram responsáveis pelo visitor.py
 
 
 # 3º Relatóio: Etapa AI-c (Tradução para o Código Intermediário)
