@@ -5,7 +5,7 @@ from pymjc.front.visitor import SemanticErrorType
 class MJLogger():
 
     def configure():
-        logging.basicConfig(filename='pymjc.log', encoding='utf-8', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
+        logging.basicConfig(filename='pymjc.log', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
     
     def lexer_log(src_file_name: str, line_number: int, token_value: str):
         logging.error(f'LEXER - {src_file_name}, Line {line_number}: Bad character {token_value}')
