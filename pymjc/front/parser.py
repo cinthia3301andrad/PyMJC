@@ -209,7 +209,7 @@ class MJParser(Parser):
 
     @_('ExpressionListStar')
     def ExpressionListOpt(self, p):
-        return p.ExpressionListStart
+        return p.ExpressionListStar
 
     @_('Expression')
     def ExpressionListStar(self, p):
