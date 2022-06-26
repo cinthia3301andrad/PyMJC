@@ -1549,9 +1549,19 @@ class TranslateVisitor(IRVisitor):
 
         return None
 
-
     def visit_class_decl_extends(self, element: ClassDeclExtends) -> translate.Exp:
-        pass
+        element.super_class_name_id.accept(self)
+        element.class_name_id.accept(self)
+        self.symbol_table.set_curr_class(element.class_name_id.name)
+       
+
+        for index in range(element.var_decl_list.size()):
+            element.var_decl_list.element_at(index).accept(self)
+
+        for index in range(element.method_decl_list.size()):
+            element.method_decl_list.element_at(index).accept(self)
+
+        return None
 
     def visit_class_decl_simple(self, element: ClassDeclSimple) -> translate.Exp:
         element.class_name_id.accept_ir(self)
@@ -1605,29 +1615,32 @@ class TranslateVisitor(IRVisitor):
         self.var_access = {}
         return None
 
-    @abstractmethod
     def visit_formal(self, element: Formal) -> translate.Exp:
-        pass
+        return None
 
-    @abstractmethod
     def visit_int_array_type(self, element: IntArrayType) -> translate.Exp:
-        pass
+        return None
 
-    @abstractmethod
     def visit_boolean_type(self, element: BooleanType) -> translate.Exp:
-        pass
+        return None
 
-    @abstractmethod
     def visit_integer_type(self, element: IntegerType) -> translate.Exp:
-        pass
+        return None
 
-    @abstractmethod
+
     def visit_identifier_type(self, element: IdentifierType) -> translate.Exp:
-        pass
+        return None
 
-    @abstractmethod
     def visit_block(self, element: Block) -> translate.Exp:
-        pass
+        """  Iniciamos do nosso exp, se não tiver ninguém no bloco, vai retornar o CONST """
+        exp: translate.Exp = translate.Exp(tree.CONST(0))
+
+        for index in range(element.statement_list.size):
+            """  aceitando os elementos de Block """
+            statement: tree.Exp = element.statement_list.element_at(index).accept_ir(self).un_ex()
+            exp = tree.ESEQ(tree.SEQ(exp,tree.EXP(statement)), tree.CONST(0))
+
+        return translate.Exp(exp)
 
     @abstractmethod
     def visit_if(self, element: If) -> translate.Exp:
