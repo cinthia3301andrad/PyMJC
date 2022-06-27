@@ -1654,7 +1654,6 @@ class TranslateVisitor(IRVisitor):
     def visit_if(self, element: If) -> translate.Exp:
         pass
   
-    @abstractmethod
     def visit_while(self, element: While) -> translate.Exp:
         condicao:tree.Exp=element.condition_exp.accept_ir(self).un_ex()
         body:tree.Exp=element.statement.accept_ir(self).un_ex()
