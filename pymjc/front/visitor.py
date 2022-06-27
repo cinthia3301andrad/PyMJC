@@ -1733,18 +1733,15 @@ class TranslateVisitor(IRVisitor):
 
         return translate.Exp(tree.BINOP(tree.BINOP.MUL,left,right))
 
-    @abstractmethod
     def visit_array_lookup(self, element: ArrayLookup) -> translate.Exp:
         in_side:tree.EXP=element.in_side_exp.accept_ir(self).un_ex()
         out_side:tree.EXP=element.out_side_exp.accept_ir(self).un_ex()
         return translate.Exp(tree.MEM(tree.BINOP(tree.BINOP.PLUS, in_side, tree.BINOP(tree.BINOP.MUL, out_side, tree.CONST(self.current_frame.word_size())))))
 
-    @abstractmethod
     def visit_array_length(self, element: ArrayLength) -> translate.Exp:
         length_exp:tree.EXP=element.length_exp.accept_ir(self).un_ex()
         return translate.Exp(tree.MEM(length_exp))
 
-    @abstractmethod
     def visit_call(self, element: Call) -> translate.Exp:
         calle_exp:tree.EXP=element.callee_exp.accept_ir(self).un_ex()
         exp_list = tree.ExpList
@@ -1764,15 +1761,12 @@ class TranslateVisitor(IRVisitor):
             label=self.symbol_table.curr_class_name, '$', element.callee_name_id.name
         return translate.Exp(tree.CALL(tree.NAME(tree.LABEL(Label(label))), exp_list))
 
-    @abstractmethod
     def visit_integer_literal(self, element: IntegerLiteral) -> translate.Exp:
         return translate.Exp(tree.CONST(element.value))
 
-    @abstractmethod
     def visit_true_exp(self, element: TrueExp) -> translate.Exp:
         return translate.Exp(tree.CONST(1))
 
-    @abstractmethod
     def visit_false_exp(self, element: FalseExp) -> translate.Exp:
         return translate.Exp(tree.CONST(0))
 
