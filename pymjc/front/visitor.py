@@ -1,7 +1,14 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from ast import Pass
+from cProfile import label
+from email.quoprimime import body_check
 import enum
+from tkinter.tix import Tree
 from typing import List
+from xml.dom.minidom import Element
+
+from numpy import identity
 from pymjc.back.assem import MOVE
 
 from pymjc.front.ast import *
@@ -12,6 +19,7 @@ from pymjc.front.visitorkinds import *
 from pymjc.front.symbol import *
 from pymjc.log import MJLogger
 from pymjc.util import Converter
+from pymjc.front.temp import Label 
 
 class SemanticErrorType(enum.Enum):
     ALREADY_DECLARED_CLASS = 1
@@ -1648,8 +1656,14 @@ class TranslateVisitor(IRVisitor):
   
     @abstractmethod
     def visit_while(self, element: While) -> translate.Exp:
-        pass
+        condicao:tree.Exp=element.condition_exp.accept_ir(self).un_ex()
+        body:tree.Exp=element.statement.accept_ir(self).un_ex()
+        teste:temp.Label=Label()
+        feito:temp.Label=Label()
 
+        conditionalLabel:tree.SEQ=tree.SEQ(tree.LABEL(teste), tree.CJUMP(tree.CJUMP.ULE, tree.EXP(condicao), tree.CONST(1), tree.LABEL(teste), tree.LABEL(feito)))
+        bodysequen:tree.SEQ=tree.SEQ(conditionalLabel, tree.SEQ(tree.SEQ(body, tree.JUMP(teste)), tree.LABEL(feito)))
+        return tree.ESEQ(bodysequen,0)
 
     def visit_print(self, element: Print) -> translate.Exp:
         exp: tree.Exp = element.print_exp.accept_ir(self).un_ex()
@@ -1721,27 +1735,46 @@ class TranslateVisitor(IRVisitor):
 
     @abstractmethod
     def visit_array_lookup(self, element: ArrayLookup) -> translate.Exp:
-        pass
+        in_side:tree.EXP=element.in_side_exp.accept_ir(self).un_ex()
+        out_side:tree.EXP=element.out_side_exp.accept_ir(self).un_ex()
+        return translate.Exp(tree.MEM(tree.BINOP(tree.BINOP.PLUS, in_side, tree.BINOP(tree.BINOP.MUL, out_side, tree.CONST(self.current_frame.word_size())))))
 
     @abstractmethod
     def visit_array_length(self, element: ArrayLength) -> translate.Exp:
-        pass
+        length_exp:tree.EXP=element.length_exp.accept_ir(self).un_ex()
+        return translate.Exp(tree.MEM(length_exp))
 
     @abstractmethod
     def visit_call(self, element: Call) -> translate.Exp:
-        pass
+        calle_exp:tree.EXP=element.callee_exp.accept_ir(self).un_ex()
+        exp_list = tree.ExpList
+        
+        exp_list.add_head(calle_exp)
+        for index in range(element.arg_list):
+            exp_list.add_tail(element.arg_list.element_at(index).accept_ir(self).un_ex())
+        label:str='$'
+        if(isinstance(element.callee_exp, IdentifierExp)):
+            exp_identity:IdentifierExp=element.callee_exp
+            label=exp_identity.name, '$', element.callee_name_id.name
+        elif(isinstance(element.callee_exp, NewObject)):
+            new_object:NewObject=element.callee_exp;
+            if(self.symbol_table.get_class_entry(new_object.object_name_id) is not None):
+                label=new_object.object_name_id, '$', element.callee_name_id
+        elif(isinstance(element.callee_exp, This)):
+            label=self.symbol_table.curr_class_name, '$', element.callee_name_id.name
+        return translate.Exp(tree.CALL(tree.NAME(tree.LABEL(Label(label))), exp_list))
 
     @abstractmethod
     def visit_integer_literal(self, element: IntegerLiteral) -> translate.Exp:
-        pass
+        return translate.Exp(tree.CONST(element.value))
 
     @abstractmethod
     def visit_true_exp(self, element: TrueExp) -> translate.Exp:
-        pass
+        return translate.Exp(tree.CONST(1))
 
     @abstractmethod
     def visit_false_exp(self, element: FalseExp) -> translate.Exp:
-        pass
+        return translate.Exp(tree.CONST(0))
 
     @abstractmethod
     def visit_identifier_exp(self, element: IdentifierExp) -> translate.Exp:
