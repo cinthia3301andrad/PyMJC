@@ -2,13 +2,12 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from ast import Pass
 from cProfile import label
-from email.quoprimime import body_check
+
 import enum
 from tkinter.tix import Tree
 from typing import List
 from xml.dom.minidom import Element
 
-from numpy import identity
 from pymjc.back.assem import MOVE
 
 from pymjc.front.ast import *
@@ -1650,11 +1649,31 @@ class TranslateVisitor(IRVisitor):
 
         return translate.Exp(exp)
 
-    @abstractmethod
+
     def visit_if(self, element: If) -> translate.Exp:
-        pass
+        #aceitar os termos e statements do if
+        exp: tree.Exp = element.condition_exp.accept_ir(self).un_ex()
+       
+        true_statement :tree.EXP=tree.EXP(element.if_statement.accept_ir(self).un_ex())
+        false_statement :tree.EXP=tree.EXP(element.else_statement.accept_ir(self).un_ex())
+       
+        label_true: tree.Label = Label()
+        label_false: tree.Label= Label()
+        label_end: tree.Label= Label()
+ 
+        #seqs de true e false
+        statement_true:tree.SEQ = tree.SEQ(tree.LABEL(label_true),true_statement)
+        statement_false:tree.SEQ = tree.SEQ(tree.LABEL(label_false),false_statement)
+        statements:tree.SEQ(statement_true,statement_false)
+        #CJUMP do if
+        cjump_if:tree.CJUMP = tree.CJUMP(tree.CJUMP.EQ,tree.CONST(1),exp ,label_true,label_false)
+       
+        seq_condition: tree.SEQ= tree.SEQ(label_end, cjump_if);
+        seq_2: tree.SEQ= tree.SEQ(seq_condition, statements);
+        
+        return tree.translate.Exp(tree.ESEQ(tree.SEQ(seq_2, tree.LABEL(label_end)), None));
   
-    @abstractmethod
+
     def visit_while(self, element: While) -> translate.Exp:
         condicao:tree.Exp=element.condition_exp.accept_ir(self).un_ex()
         body:tree.Exp=element.statement.accept_ir(self).un_ex()
