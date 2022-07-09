@@ -1,5 +1,3 @@
-from queue import Empty
-from xml.dom.minidom import Identified
 from pymjc.front.ast import *
 from pymjc.front.lexer import MJLexer
 from sly import Parser
@@ -16,7 +14,8 @@ class MJParser(Parser):
     precedence = (('nonassoc', LESS, AND),
                   ('left', PLUS, MINUS),        
                   ('left', TIMES),
-                  ('right', NOT)
+                  ('right', NOT),
+                  ('left', DOT)
                  )
                  
     tokens = MJLexer.tokens
@@ -31,6 +30,7 @@ class MJParser(Parser):
     ###################################    
     @_('MainClass ClassDeclarationStar')
     def Goal(self, p):
+        p.ClassDeclarationStar.class_decl_list.reverse()
         return Program(p.MainClass, p.ClassDeclarationStar)
     
     @_('CLASS Identifier LEFTBRACE PUBLIC STATIC VOID MAIN LEFTPARENT STRING LEFTSQRBRACKET RIGHTSQRBRACKET Identifier RIGHTPARENT LEFTBRACE Statement RIGHTBRACE RIGHTBRACE')
@@ -48,10 +48,11 @@ class MJParser(Parser):
 
     @_('CLASS Identifier SuperOpt LEFTBRACE VarDeclarationStar MethodDeclarationStar RIGHTBRACE')
     def ClassDeclaration(self, p):
-        if(type(p.SuperOpt)!= Identifier):
-            ClassDeclExtends(p.Identifier, p.SuperOpt, p.VarDeclarationStar, p.MethodDeclarationStar)
-        else:
-            ClassDeclSimple(p.Identifier, p.VarDeclarationStar, p.MethodDeclarationStar) 
+        if p.SuperOpt is None:
+            return ClassDeclSimple(p.Identifier, p.VarDeclarationStar, p.MethodDeclarationStar)
+        
+        return ClassDeclExtends(p.Identifier, p.SuperOpt, p.VarDeclarationStar, p.MethodDeclarationStar)
+
 
     @_('Empty')
     def SuperOpt(self, p):
@@ -72,7 +73,7 @@ class MJParser(Parser):
 
     @_('Type Identifier SEMICOLON')
     def VarDeclaration(self, p):
-        return p.Identifier
+        return VarDecl(p.Type, p.Identifier)
 
     @_('Empty')
     def MethodDeclarationStar(self, p):
@@ -85,6 +86,7 @@ class MJParser(Parser):
 
     @_('PUBLIC Type Identifier LEFTPARENT FormalParamListOpt RIGHTPARENT LEFTBRACE VarDeclarationStar StatementStar RETURN Expression SEMICOLON RIGHTBRACE')
     def MethodDeclaration(self, p):
+        p.StatementStar.statement_list.reverse()
         return MethodDecl(p.Type, p.Identifier, p.FormalParamListOpt, p.VarDeclarationStar, p.StatementStar, p.Expression)
 
     @_('Empty')
@@ -97,9 +99,9 @@ class MJParser(Parser):
 
     @_('FormalParam')
     def FormalParamStar(self, p):
-        list_formal = FormalList()
-        list_formal.add_element(p.FormalParam)
-        return list_formal
+        formal_list = FormalList()
+        formal_list.add_element(p.FormalParam)
+        return formal_list
 
     @_('FormalParamStar COMMA FormalParam')
     def FormalParamStar(self, p):
@@ -108,7 +110,7 @@ class MJParser(Parser):
 
     @_('Type Identifier')
     def FormalParam(self, p):
-        return p
+        return Formal(p.Type, p.Identifier)
         
     ###################################
     #Type Declarations                #
@@ -128,7 +130,7 @@ class MJParser(Parser):
 
     @_('Identifier')
     def Type(self, p):
-        return IdentifierType(p.Identifier)
+        return IdentifierType(p.Identifier.name)
 
     ###################################
     #Statements Declarations          #
@@ -213,9 +215,9 @@ class MJParser(Parser):
 
     @_('Expression')
     def ExpressionListStar(self, p):
-        expressions = ExpList()
-        expressions.add_element(p.Expression)
-        return expressions
+        exp_list = ExpList()
+        exp_list.add_element(p.Expression)
+        return exp_list
 
     @_('ExpressionListStar COMMA Expression')
     def ExpressionListStar(self, p):
@@ -244,25 +246,23 @@ class MJParser(Parser):
 
     @_('Identifier')
     def Expression(self, p):
-        return IdentifierExp(p.Identifier)
+        return IdentifierExp(p.Identifier.name)
 
     @_('Literal')
     def Expression(self, p):
-        if(p.Literal == "true"):
-            return TrueExp()
-        elif(p.Literal == "false"):
-            return FalseExp()
         return p.Literal
+
     ###################################
     #Basic Declarations               #
     ###################################
     @_('ID')
     def Identifier(self, p):
-        return IdentifierExp(str(p.ID))
+        return Identifier(str(p.ID))
 
     @_('')
     def Empty(self, p):
         return None
+
 
     ##################################
     #Literals Declarations           #

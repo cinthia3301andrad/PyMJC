@@ -64,19 +64,31 @@
 
 1. Qual é o nome do relator?
 
-    > Escreva sua resposta aqui
+    > Cinthia
 
 2. A etapa foi completamente ou parcialmente concluída?
 
-    > Escreva sua resposta aqui
+    > Parcialmente, 
 
 3. No caso de parcialmente concluída, o que não foi concluído?
 
-    > Escreva sua resposta aqui
+    > as funções 
+    def visit_identifier_exp(self, element: IdentifierExp) -> translate.Exp:
+  
+    def visit_this(self, element: This) -> translate.Exp:
+        
+    def visit_new_array(self, element: NewArray) -> translate.Exp:
+       
+    def visit_new_object(self, element: NewObject) -> translate.Exp:
+       
+    def visit_not(self, element: Not) -> translate.Exp:
+    
+    def visit_identifier(self, element: Identifier) -> translate.Exp:
+    e a def visit_if
 
 4. O programa passa nos testes automatizados?
     
-    > Escreva sua resposta aqui
+    > Não em todos
 
 5. Algum erro de execução foi encontrado para alguma das entradas? Quais?
     
@@ -84,11 +96,11 @@
 
 6. Quais as dificuldades encontradas para realização da etapa do projeto?
     
-    > Escreva sua resposta aqui
+    > Não conseguimos interpretar o resultado ao rodar os testes
 
 7. Qual a participação de cada membro da equipe na etapa de execução?
     
-    > Escreva sua resposta aqui
+    > Dividimos as funções entre os membros, Cada um ficou com 7. Porém o Geovane não conseguiu entregar a parte dele.
 
 
 # 4º Relatóio: Etapa AI-d (Seleção de Instruções)
