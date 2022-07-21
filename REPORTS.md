@@ -138,31 +138,31 @@
 
 1. Qual é o nome do relator?
 
-    > Escreva sua resposta aqui
+    > Geovane
 
 2. A etapa foi completamente ou parcialmente concluída?
 
-    > Escreva sua resposta aqui
+    > Parcialmente
 
 3. No caso de parcialmente concluída, o que não foi concluído?
 
-    > Escreva sua resposta aqui
+    > Implementação da classe RegAlloc não foi entregue
 
 4. O programa passa nos testes automatizados?
     
-    > Escreva sua resposta aqui
+    > Não se aplica
 
 5. Algum erro de execução foi encontrado para alguma das entradas? Quais?
     
-    > Escreva sua resposta aqui
+    > Não se aplica
 
 6. Quais as dificuldades encontradas para realização da etapa do projeto?
     
-    > Escreva sua resposta aqui
+    > Abstração da análide de longividade no momento da escrita do algoritmo responsável por definir os arrays live-in e live-out e do algoritmo da construição do grafo de interferência.
 
 7. Qual a participação de cada membro da equipe na etapa de execução?
     
-    > Escreva sua resposta aqui
+    > O relator foi responsável por implementar a classe Liveness
 
 
 # 6º Relatóio: Etapa AI-f (Integração e Geração do Código Final)
