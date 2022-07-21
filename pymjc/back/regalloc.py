@@ -155,12 +155,11 @@ class Liveness (InterferenceGraph):
 
     def build_in_and_out(self):
         # A variable is live-in at a node if it is live on any of the in-edges of that node
-        #<Node, Set[Temp]>
-        live_in = {}
+        live_in: Set[temp.Temp] = []
 
         # A variable is live-out at a node if it is live on any of the out-edges of the node.
         #<Node, Set[Temp]>
-        live_out = {}
+        live_out: Set[temp.Temp] = []
 
         # Get nodes of flowgraph
         nodes = self.flowgraph.nodes()
@@ -183,8 +182,8 @@ class Liveness (InterferenceGraph):
             while (nl is not None):
                 n: graph.Node = nl.head
                 if (n is not None):
-                    live_in[n] = self.in_node_table[n]
-                    live_out[n] = self.out_node_table[n]
+                    live_in = self.in_node_table[n]
+                    live_out = self.out_node_table[n]
 
                     #in[n] ← use[n] ∪ (out[n] − def[n])
                     minus_set_op = self.out_node_table[n] - self.flowgraph.deff(n).typing_set()
@@ -204,10 +203,10 @@ class Liveness (InterferenceGraph):
                             s = None
                     self.out_node_table[n] = union_set_op
 
-                    if not live_in[n] == self.in_node_table[n] or \
-                        not live_out[n] == self.out_node_table[n]:
+                    #condition for stop
+                    if not live_in == self.in_node_table[n] or \
+                        not live_out == self.out_node_table[n]:
                         eq_valid = False
-
                 nl = nl.tail
 
     def build_interference_graph(self):
