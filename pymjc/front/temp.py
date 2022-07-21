@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-
+from typing import Set
+from pymjc.back.graph import NodeList
 from pymjc.front.symbol import Symbol
 
 class Temp():
@@ -33,7 +34,18 @@ class TempList():
                 last = last.tail
             last.tail = TempList(element, None)
 
-        
+    def typing_set(self) -> Set[Temp]:
+        s: Set[Temp] = {}
+        node: Temp = self.head
+        next: TempList = self.tail
+        while (node is not None):
+            s.add(node)
+            if next is not None:
+                node = next.head                
+                next = next.tail
+            else:
+                break
+        return s
 
 
 class TempMap(ABC):

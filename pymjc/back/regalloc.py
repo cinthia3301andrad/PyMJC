@@ -154,8 +154,61 @@ class Liveness (InterferenceGraph):
         pass
 
     def build_in_and_out(self):
-        #TODO
-        pass
+        # A variable is live-in at a node if it is live on any of the in-edges of that node
+        #<Node, Set[Temp]>
+        live_in = {}
+
+        # A variable is live-out at a node if it is live on any of the out-edges of the node.
+        #<Node, Set[Temp]>
+        live_out = {}
+
+        # Get nodes of flowgraph
+        nodes = self.flowgraph.nodes()
+
+        # Initialize mapping arrays
+        nl: graph.NodeList = nodes
+        while (nl is not None):
+            n: graph.Node = nl.head
+            if (n is not None):
+                self.in_node_table[n] = {}
+                self.out_node_table[n] = {}
+            nl = nl.tail
+
+        # Calculate live-in and live-out using use and def
+        eq_valid: bool = False
+        while not eq_valid:
+            eq_valid = True
+
+            nl: graph.NodeList = nodes
+            while (nl is not None):
+                n: graph.Node = nl.head
+                if (n is not None):
+                    live_in[n] = self.in_node_table[n]
+                    live_out[n] = self.out_node_table[n]
+
+                    #in[n] ← use[n] ∪ (out[n] − def[n])
+                    minus_set_op = self.out_node_table[n] - self.flowgraph.deff(n).typing_set()
+                    self.in_node_table[n] = self.flowgraph.use(n).typing_set().union(minus_set_op)
+
+                    #out[n] ← Us∈succ[n] in[s]
+                    successors = n.succ()
+                    s: graph.Node = successors.head
+                    next: graph.NodeList = successors.tail
+                    union_set_op: Set[temp.Temp] = {}
+                    while (s is not None):
+                        union_set_op.union(self.in_node_table[s])
+                        if next is not None:
+                            s = next.head
+                            next = next.tail
+                        else:
+                            s = None
+                    self.out_node_table[n] = union_set_op
+
+                    if not live_in[n] == self.in_node_table[n] or \
+                        not live_out[n] == self.out_node_table[n]:
+                        eq_valid = False
+
+                nl = nl.tail
 
     def build_interference_graph(self):
         #TODO
