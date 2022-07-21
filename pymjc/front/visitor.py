@@ -1530,7 +1530,8 @@ class TranslateVisitor(IRVisitor):
         self.symbol_table.set_curr_class(element.class_name_id.name)
         self.symbol_table.set_curr_method("main")
 
-        escapes_list = List[bool]
+        escapes_list: List[bool] = []
+
         for i in range(self.symbol_table.curr_method.get_num_params()):
             escapes_list.append(False)
         

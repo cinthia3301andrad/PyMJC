@@ -2,8 +2,10 @@ from contextlib import nullcontext
 import itertools
 from typing import List
 from pymjc.back import assem
-from pymjc.front import frame, temp, tree
+from pymjc.front import frame
 from pymjc.front.symbol import Symbol
+from pymjc.front import temp
+from pymjc.front import tree
 from pymjc.util import BoolList
 
 class InFrame(frame.Access):
@@ -383,9 +385,11 @@ class MipsFrame(frame.Frame):
 
     word_size = 4
 
-    def __init__(self, symbol: Symbol = None, formal_list: BoolList = None):
+    def __init__(self, symbol: Symbol = None, formal_list: List[bool] = None):
         self.offset :int = 0
         self.max_arg_offset :int = 0
+        self.name: temp.Label = None
+
         if (symbol is not None) and (formal_list is not None):
             count = MipsFrame.functions.get(symbol.to_string())
 
@@ -397,14 +401,14 @@ class MipsFrame(frame.Frame):
                 self.name = temp.Label(symbol.to_string() + "." + str(count))
             
             MipsFrame.functions[symbol.to_string()] = count
-            self.actuals = List[frame.Access]
-            self.formals = List[frame.Access]
+            self.actuals: List[frame.Access] = []
+            self.formals: List[frame.Access] = []
 
             offset :int = 0
-            if len(formal_list.list) == 0:
+            if len(formal_list) == 0:
                 return None
             
-            escapes = iter(formal_list.list)
+            escapes = iter(formal_list)
             escape = next(escapes)
             self.formals.append(self.alloc_local(escape))
             self.actuals.append(InReg(MipsFrame.V0))
@@ -415,7 +419,7 @@ class MipsFrame(frame.Frame):
                 except StopIteration:
                     break
             
-            offset += self.word_size
+            offset += self.get_word_size()
             self.actuals.append(InReg(self.arg_regs[i]))
 
             if escape:
@@ -426,7 +430,7 @@ class MipsFrame(frame.Frame):
             try:
                 while True:
                     escape = next(escapes)
-                    offset += MipsFrame.word_size
+                    offset += self.get_word_size()
                     actual = InFrame(offset)
                     self.actuals.append(actual)
                     if escape:
@@ -446,7 +450,7 @@ class MipsFrame(frame.Frame):
     def alloc_local(self, escape: bool) -> frame.Access:
         if escape:
             result = InFrame(self.offset)
-            self.offset -= MipsFrame.word_size
+            self.offset -= self.get_word_size()
             return result
         else:
             return InReg(temp.Temp())
@@ -454,7 +458,7 @@ class MipsFrame(frame.Frame):
     def FP(self) -> temp.Temp:
         return MipsFrame.FP
 
-    def  word_size(self) -> int:
+    def get_word_size(self) -> int:
         return MipsFrame.word_size
 
     def external_call(self, func:str, args: List[tree.Exp]) -> tree.Exp:
